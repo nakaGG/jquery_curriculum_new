@@ -23,11 +23,75 @@
         </div>
         <div class="message" data-js="error-message"></div>
         <ul class="lists" data-js="book-lists"></ul>
+        <div class="pager" data-js="pager">
+          <div class="counter">
+            <span class="counter-current"></span>/<span class="counter-all"></span>
+          </div>
+          <div class="btn-wrapper">
+            <a class="btn-item" data-js="page-prev" href="">前へ</a>
+            <a class="btn-item" data-js="page-next" href="">次へ</a>
+          </div>
+        </div>
       </div>
     </div>
     <script src="../../common/js/jquery.js"></script>
     <script src="./js/appid.js"></script>
     <script>
+      $(function() {
+        var page = 1
+        var searchText
+        $('.search__btn').click(function() {
+          searchText = $('.search__text__input').val();
+          searchBooks()
+          console.log(searchText);
+        });
+
+        $('.btn-item').click(function(e) {
+          e.preventDefault();
+          var btnData = $(this).data('js');
+          if (btnData === "page-next") {
+            page++;
+          } else if (btnData === "page-prev") {
+            page--;
+          };
+          console.log(page);
+          searchBooks();
+        });
+
+        function searchBooks() {
+          $('.lists').empty();
+          $.ajax({
+            url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
+            type: 'GET',
+            datatype: 'json',
+            data: {
+            //     // 「区分:サービス固有パラメーター」を確認して、必要な情報をdata内に入れましょう。
+              applicationId: appId, //(今回はこの変数をIDとして使用します) //※メンターから別途渡されるファイルを読み込んでください。
+              booksGenreId: '001',
+              hits: 20,
+              keyword: searchText,
+              page: page,
+            }
+          }).done(function(data) {
+          //   // この中にデータ取得後の動きを記述していきます。
+            console.log(data);
+            $.each(data.Items, function(index, item) {
+              console.log(item)
+              var template =
+                '<li class="lists__item">' +
+                  '<div class="lists__item__inner">' +
+                      '<a href="' + item.Item.itemUrl + '"class="lists__item__link" target="_blank">' +
+                      '<img src="' + item.Item.mediumImageUrl + '" class="lists__item__img" alt="' + item.Item.title + '">' +
+                      '<p class="lists__item__detail">作品名：' + item.Item.title + '</p>' +
+                      '<p class="lists__item__detail">作者　：' + item.Item.author + '</p>' +
+                      '<p class="lists__item__detail">出版社：' + item.Item.publisherName + '</p>' + '</a>' +
+                  '</div>' +
+                '</li>';
+              $('.lists').prepend(template)
+            });
+          });
+        }
+      });
       // 楽天ブックスの総合検索APIを使って製作してください。
       // answerの挙動を良く見てね！
       //
