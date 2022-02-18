@@ -26,7 +26,7 @@
     <script>
       $(function() {
         $('.nav li').click(function() {
-          var index = $('.nav li').index(this);
+          var index = $(this).index();
           $('.contents li').addClass('is-hidden').eq(index).removeClass('is-hidden');
         })
       });
